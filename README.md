@@ -1,8 +1,10 @@
 # AirScript ✍️
 
-**Vision-based air-writing recognition and intelligent digital notepad**
+**Vision-Based Air-Writing Recognition and Intelligent Digital Notepad**
 
-AirScript is a Python-based computer vision project that lets users draw in the air using hand gestures. It tracks the index fingertip through a webcam and renders the drawing on a persistent digital canvas.
+AirScript is a Python-based computer vision project that allows users to write in the air using hand gestures. It tracks the user's index fingertip through a webcam and renders movements on a persistent digital canvas.
+
+AirScript also integrates a Convolutional Neural Network (CNN) trained on the MNIST dataset to recognize handwritten digits from the drawing canvas.
 
 ## Current Features
 
@@ -10,35 +12,45 @@ AirScript is a Python-based computer vision project that lets users draw in the 
 - Hand tracking using MediaPipe.
 - Index fingertip position detection.
 - Gesture-based drawing using the index finger.
-- Persistent drawing canvas.
-- Clear the canvas using the keyboard.
+- Persistent digital drawing canvas.
+- Clear the canvas using keyboard controls.
 - Live gesture status displayed on the camera feed.
+- CNN-based handwritten digit recognition (0–9).
+- Real-time digit prediction with confidence scores.
+- MNIST-based model training using PyTorch.
 
 ## Tech Stack
 
-- Python
-- OpenCV
-- MediaPipe
-- NumPy
+| Technology | Purpose |
+|---|---|
+| Python | Core programming language |
+| OpenCV | Webcam access and image processing |
+| MediaPipe | Hand tracking and landmark detection |
+| NumPy | Numerical operations and image processing |
+| PyTorch | CNN model development and training |
+| Torchvision | MNIST dataset and image transformations |
 
 ## Project Structure
 
 ```text
 AirScript/
-├── models/
-│   └── hand_landmarker.task   # Download separately
+├── data/                       # MNIST dataset (ignored by Git)
+├── models/                     # Model files (ignored by Git)
+│   ├── hand_landmarker.task
+│   └── digit_cnn.pth
 ├── src/
 │   ├── airscript/
+│   │   ├── __init__.py
 │   │   ├── camera.py
 │   │   ├── hand_tracker.py
 │   │   ├── stroke.py
-│   │   └── drawing_canvas.py
+│   │   ├── drawing_canvas.py
+│   │   ├── digit_model.py
+│   │   ├── digit_predictor.py
+│   │   └── train_model.py
 │   └── main.py
 ├── tests/
-│   ├── test_camera_manual.py
-│   ├── test_hand_tracker_manual.py
-│   ├── test_stroke_manual.py
-│   └── test_drawing_canvas_manual.py
+│   └── test_digit.py
 ├── .gitignore
 └── README.md
 ```
@@ -62,12 +74,13 @@ source .venv/bin/activate
 ### 3. Install dependencies
 
 ```bash
-python -m pip install opencv-python mediapipe numpy
+python -m pip install --upgrade pip
+pip install opencv-python mediapipe numpy torch torchvision
 ```
 
-### 4. Download the hand landmark model
+### 4. Download the MediaPipe hand landmark model
 
-Create the models directory if it doesn't exist:
+Create the models directory:
 
 ```bash
 mkdir -p models
@@ -79,9 +92,26 @@ Download the official MediaPipe Hand Landmarker model and save it as:
 models/hand_landmarker.task
 ```
 
-The model file is excluded from Git because it is a downloaded binary. Keep it locally in the `models/` directory.
+Official documentation:  
+https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
 
-Official model documentation: https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
+### 5. Train the digit recognition model
+
+AirScript uses a CNN trained on the MNIST handwritten digit dataset.
+
+Run:
+
+```bash
+PYTHONPATH=src python src/airscript/train_model.py
+```
+
+The training script automatically downloads MNIST, trains the CNN, evaluates its accuracy, and saves the trained model to:
+
+```text
+models/digit_cnn.pth
+```
+
+**Note:** Model files and datasets are excluded from Git. You must download the hand landmark model and train the digit recognition model locally before running AirScript.
 
 ## Run AirScript
 
@@ -91,24 +121,62 @@ From the project root, with the virtual environment activated:
 PYTHONPATH=src python src/main.py
 ```
 
+Make sure both required model files are available in the `models/` directory.
+
 ## Controls
 
-| Control | Action |
+| Control / Gesture | Action |
 |---|---|
 | Raise your index finger | Draw on the canvas |
 | Make a fist or lower other fingers | Stop drawing |
+| `P` | Predict the handwritten digit |
 | `C` | Clear the canvas |
 | `Q` | Quit the application |
 
+## Digit Recognition Model
+
+AirScript uses a Convolutional Neural Network (CNN) built with PyTorch.
+
+The model:
+- Uses convolutional and max-pooling layers for feature extraction.
+- Uses fully connected layers for digit classification.
+- Recognizes handwritten digits from 0 to 9.
+- Is trained using the MNIST dataset.
+- Preprocesses canvas drawings into 28 × 28 images before prediction.
+
+**Training Performance**
+
+- Dataset: MNIST
+- Training epochs: 5
+- Optimizer: Adam
+- Loss function: Cross Entropy Loss
+- Test accuracy: 99.09%
+
+*Accuracy represents performance on the MNIST test dataset; real-world air-written recognition may vary.*
+
 ## Roadmap
 
-- [ ] Smooth fingertip movement for cleaner strokes.
+- [ ] Improve prediction accuracy for air-written digits.
+- [ ] Collect a custom dataset of air-written digits.
+- [ ] Improve fingertip movement smoothing.
 - [ ] Improve gesture detection reliability.
-- [ ] Combine the camera feed and drawing canvas into one window.
-- [ ] Explore air-writing character recognition.
+- [ ] Combine the camera feed and drawing canvas into one interface.
+- [ ] Extend recognition beyond digits to alphabets and words.
 - [ ] Develop intelligent digital-notepad features.
 
 ## Project Status
 
-AirScript is under active development. Webcam access, hand tracking, gesture-controlled drawing, and the persistent canvas are currently implemented.
+AirScript is under active development.
 
+Currently implemented:
+- Real-time webcam access.
+- MediaPipe-based hand tracking.
+- Gesture-controlled air-writing.
+- Persistent digital drawing canvas.
+- CNN-based handwritten digit recognition.
+
+The next development phase focuses on improving recognition accuracy using real-world air-written samples and expanding the system's capabilities.
+
+---
+
+**Developed by Anuj Taneja**
